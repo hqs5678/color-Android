@@ -1,20 +1,19 @@
-apply plugin: 'com.android.application'
-//apply plugin: 'com.github.dcendents.android-maven'
-//apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
 
-version = '0.0.1'
-
+version = '0.0.3'
+def vc = 3
 
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
 
     defaultConfig {
-        applicationId "com.example.test"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 1
-        versionName "0.0.1"
+        versionCode vc
+        versionName version
 
     }
     buildTypes {
@@ -25,6 +24,7 @@ android {
     }
 }
 ///Applications/Android Studio.app/Contents/gradle/gradle-2.14.1
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -34,10 +34,75 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
+
+def siteUrl = 'https://github.com/hqs5678/color-Android'   // 项目的主页
+def gitUrl = 'https://github.com/hqs5678/color-Android.git'   // Git仓库的url
+group = "com.hqs.test"            // Maven Group ID for the artifact，
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                // Add your description here
+                name 'Let the music to keep up with your tempo'
+                //项目的描述 你可以多写一点
+                url siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'hqshotmail'        //填写的一些基本信息
+                        name 'hqshotmail'
+                        email 'huangqingsong_5678@hotmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
 }
+//task javadoc(type: Javadoc){
+//options.encoding = 'UTF-8'
+//source = android.sourceSets.main.java.srcDirs
+// classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//}
+//task javadocJar(type: Jar, dependsOn: javadoc) {
+//    classifier = 'javadoc'
+//    from javadoc.destinationDir
+//}
+
+Properties properties = new Properties()//读取properties的配置信息，当然直接把信息写到代码里也是可以的
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        userOrg="huangqingsong"
+        repo = "test"         //这个应该是传到maven的仓库的
+        name = "test"    //发布的项目名字
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
+
 
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
@@ -53,76 +118,4 @@ artifacts {
     archives sourcesJar
 }
 
-group = 'net.cpacm.simpleslider'
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            packaging 'aar'
-            groupId 'net.cpacm.simpleslider' //自己定义的组名
-            artifactId 'library'
 
-            name 'simpleslider'
-            description 'A simple slider allows you to easily use.'
-            url 'https://github.com/cpacm/SimpleSlider'
-            inceptionYear '2016'
-
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
-                }
-            }
-            scm {
-                connection 'https://github.com/cpacm/SimpleSlider.git'
-                url 'https://github.com/cpacm/SimpleSlider'
-
-            }
-            developers {
-                developer {
-                    name 'cpacm'
-                    email 'shenliming@gmail.com'
-                }
-            }
-        }
-
-    }
-}
-
-
-// Bintray
-
-//获取local.propertes的信息
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-    publish = true
-    configurations = ['archives']
-    pkg {
-        //填入 bintray 上对应的 package 信息
-        repo = 'maven'
-        name = 'SimpleSlider'
-        vcsUrl = 'https://github.com/cpacm/SimpleSlider.git'
-        websiteUrl = 'https://github.com/cpacm/SimpleSlider'
-        licenses = ['Apache-2.0']
-        issueTrackerUrl = 'https://github.com/cpacm/SimpleSlider/issues'
-        publicDownloadNumbers = true
-        version {
-            name = '1.0.0'
-            desc = 'simple slider release'
-            vcsTag = '1.0.0'
-            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
-        }
-    }
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
-
-task findConventions << {
-    println project.getConvention()
-}
